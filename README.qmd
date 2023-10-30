@@ -69,6 +69,8 @@ crime_by_date <- crime2 %>%
 Then we visualized the violent and property crimes by neighborhood shown on the graphs below.
 
 ```{r}
+
+#| warning: false
 library("terra")
 library("tidyverse")
 
@@ -95,9 +97,12 @@ This data was obtained by NASA MERRA Data.
 
 In this code, we first found the angle of each county using the coordinate points from our data. Then, we converted the angles to degrees. Finally, we categorized whether or not the county had wind flowing in its direction with a zero or one using a if else statement.
 
-```{r}
-install.packages("terra")
-install.packages("tidyterra")
+``` r
+{r}
+
+#| eval: false
+#| echo: false
+
 library("terra")
 library("tidyterra")
 
@@ -124,7 +129,7 @@ The control variables we have taken into account are certain neighborhood charac
 The code below demonstrates the merging between the data sets of crime by race, neighborhood, and date.
 
 ```{r}
-
+#| eval: false
 library("tidyverse")
 library("dplyr")
 
@@ -140,4 +145,4 @@ crime_by_race_date_intersect <- full_join(race2, intersect3, by = "Neighborhood"
 
 ## Preliminary Results
 
-Display a figure showing how the treatment variable impacted the outcome variable.
+Display a figure showing how the treatment variable impacted the outcome variable.![](kush graph.png)
