@@ -26,20 +26,65 @@ install.packages("tidyverse")
 library("tidyverse")
 
 #Read crime data
-crime <- read.csv("DATA/crime_14_22.csv")
+crime <- read.csv("crime_14_22.csv")
 crime2<-crime %>%
   
   mutate(Violent= ifelse(Description== "HOMICIDE", 1, 0)) %>%
   
   mutate(Violent= ifelse(Description== "AGG. ASSAULT", 1, Violent)) %>%
   
+  mutate(Violent= ifelse(Description== "COMMON ASSAULT", 1, Violent)) %>% 
+  
+  mutate(Violent= ifelse(Description== "RAPE", 1, Violent)) %>% 
+  
+  mutate(Violent= ifelse(Description== "SHOOTING", 1, Violent)) %>% 
+  
   mutate(Property= ifelse(Description== "ROBBERY - CARJACKING", 1, 0)) %>%
+  
+  mutate(Violent= ifelse(Description== "ROBBERY - COMMERCIAL", 1, Violent)) %>%
+  
+  mutate(Violent= ifelse(Description== "ROBBERY - STREET", 1,Violent)) %>%
+  
+  mutate(Violent= ifelse(Description== "ROBBERY - RESIDENCE", 1, Violent)) %>%
   
   mutate(Property= ifelse(Description== "ARSON", 1, Property)) %>%
   
-  crime_by_date <- crime2 %>%
+  mutate(Property= ifelse(Description== "AUTO THEFT", 1, Property)) %>%
+  
+  mutate(Property= ifelse(Description== "BURGLARY", 1, Property)) %>%
+  
+  mutate(Property= ifelse(Description== "LARCENY", 1, Property)) %>%
+  
+  mutate(Property= ifelse(Description== "LARCENY FROM AUTO", 1, Property)) %>%
+  
+  mutate(Race = ifelse(Race == "", "UNKNOWN", Race)) %>%
+  
+  mutate(Neighborhood = ifelse(Neighborhood == "", "UNKNOWN", Neighborhood))
+
+crime_by_date <- crime2 %>%
   group_by(Neighborhood, date) %>%
   summarize(total_violent_crime = sum(Violent), total_property_crime = sum(Property))
+```
+
+Then we visualized the violent and property crimes by neighborhood shown on the graphs below.
+
+```{r}
+library("terra")
+library("tidyverse")
+
+n<-vect("Neighborhood/Neighborhood.shp")
+n_project<-project(n, "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ")
+n_project$Name <- toupper(n_project$Name)
+
+df_sum <- read.csv("finaldata.csv") %>%
+  filter(Name %in% n_project$Name) %>%
+  group_by(Name) %>%
+  summarise(all_violent = sum(total_violent_crime), 
+            all_property = sum(total_property_crime))
+n2<-merge(n_project, df_sum, by = "Name")
+
+plot(n2, "all_violent", plg = list(title = "Violent Crimes by Neighborhood"))
+plot(n2, "all_property", plg = list(title = "Property Crimes by Neighborhood"))
 ```
 
 **Treatment variable**
