@@ -90,3 +90,37 @@ crime_by_race_date_intersect <- full_join(race2, intersect3, by = "Neighborhood"
 
 Display a figure showing how the treatment variable impacted the outcome
 variable.
+```
+data <- read.csv("finaldata.csv")
+wind_graph_data <- data %>%
+  select (Name, total_violent_crime, treatment) %>%
+  filter(total_violent_crime >= 1, treatment == 1)
+
+no_wind_graph_data <- data %>%
+  select(Name, total_violent_crime, treatment) %>%
+  filter(total_violent_crime >= 1, treatment == 0)
+
+wind_data <- wind_graph_data %>%
+  group_by(Name) %>%
+  summarize(crime = sum(total_violent_crime) / n()) %>%
+  mutate(group="Wind")
+
+nowind_data <- no_wind_graph_data %>%
+  group_by(Name) %>%
+  summarize(crime = sum(total_violent_crime) / n()) %>%
+  mutate(group="No Wind")
+
+n<-wind_data$Name[1:20]
+
+combined_data <- rbind(wind_data, nowind_data)%>%
+  filter(Name %in% n) %>%
+  arrange(desc(crime))
+
+ggplot(combined_data, aes(x = Name, y=crime, fill=group)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Average Crime by County (Wind Data vs. No Wind Data)",
+       x = "County", y = "Average Number of Violent Crimes Per Day") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)
+  ) +
+  scale_y_continuous(labels = scales::comma)
+```
