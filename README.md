@@ -4,7 +4,9 @@ Advik, Alan, Brian Mark, Esha, Kush, Sreeja
 
 ## Research Question
 
-How does the air pollution rate impact the violent crime rate in Baltimore City? 
+How does the air pollution rate impact the violent crime rate in Baltimore City?
+
+![](pollutioncrime.webp)
 
 ## Data Wrangling
 
