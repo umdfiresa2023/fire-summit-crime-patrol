@@ -1,0 +1,110 @@
+---
+title: "Clean crime data"
+format: html
+editor: visual
+---
+
+```{r}
+install.packages("terra")
+install.packages("dplyr")
+install.packages("tidyterra")
+install.packages("ggplot2")
+library("terra")
+library("dplyr")
+library("tidyterra")
+library("ggplot2")
+```
+
+Read crime data
+
+```{r}
+n<-vect("DATA/Neighborhood/Neighborhood.shp")
+
+b<-n %>%
+  filter(Name=="Beechfield")
+
+b_project<-project(b,"+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ")
+
+box<-crds(b_project)
+```
+
+```{r}
+w_y<- 39.270347862575214
+w_x<- -76.62909892334027
+
+x_axis <- w_y
+y_axis <- w_x
+```
+
+```{r}
+df<-read.csv("neighborhood_angle.csv")
+
+df2<-df %>%
+  mutate(n1x=xmin-y_axis, #y componet
+         n2x=xmax-y_axis, 
+         n1y=ymin-x_axis, #x component
+         n2y=ymax-x_axis) %>%
+  mutate(ang1=atan2(n1x,n2y)*(180/pi), ang2=atan2(n2x,n1y)*(180/pi)) %>%
+  mutate(Name=toupper(Name)) %>%
+  mutate(min_ang = pmin(ang1, ang2), max_ang = pmax(ang1, ang2))
+
+```
+
+```{r}
+all<-read.csv("full_merge.csv") %>%
+  rename(Name=Neighborhood) %>%
+  mutate(wind_dir=atan2(ULML, VLML)*(180/pi))
+
+all2<-merge(df2, all, by="Name")%>%
+  mutate(treatment = ifelse(wind_dir > min_ang & wind_dir< max_ang, 1, 0)) %>%
+  filter(!is.na(treatment)) %>%
+  select(-X.x, -X.y, -ang1, -ang2, -n1x, -n2x, -n1y, -n2y, -ULML, -VLML)
+
+write.csv(all2, "finaldata.csv", row.names = F)
+
+```
+
+```{r}
+test<-all2 %>%
+  select(min_ang, max_ang, wind_dir) %>%
+  mutate(in_dir = ifelse(wind_dir > min_ang & wind_dir< max_ang, 1, 0))
+```
+
+```{r}
+data <- read.csv("finaldata.csv")
+wind_graph_data <- data %>%
+  select (Name, total_violent_crime, treatment) %>%
+  filter(total_violent_crime >= 1, treatment == 1)
+
+no_wind_graph_data <- data %>%
+  select(Name, total_violent_crime, treatment) %>%
+  filter(total_violent_crime >= 1, treatment == 0)
+```
+
+```{r}
+wind_data <- wind_graph_data %>%
+  group_by(Name) %>%
+  summarize(crime = sum(total_violent_crime) / n()) %>%
+  mutate(group="Wind")
+
+nowind_data <- no_wind_graph_data %>%
+  group_by(Name) %>%
+  summarize(crime = sum(total_violent_crime) / n()) %>%
+  mutate(group="No Wind")
+
+n<-wind_data$Name[1:20]
+```
+
+```{r}
+combined_data <- rbind(wind_data, nowind_data)%>%
+  filter(Name %in% n) %>%
+  arrange(desc(crime))
+
+ggplot(combined_data, aes(x = Name, y=crime, fill=group)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Average Crime by County (Wind Data vs. No Wind Data)",
+       x = "County", y = "Average Number of Violent Crimes Per Day") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)
+  ) +
+  scale_y_continuous(labels = scales::comma)
+```

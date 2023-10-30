@@ -117,8 +117,6 @@ test<-all2 %>%
   mutate(in_dir = ifelse(wind_dir > min_ang & wind_dir< max_ang, 1, 0))
 ```
 
-Write description, data source, and wrangling methodology. Show a map if you have one.
-
 **Control variables**
 
 The control variables we have taken into account are certain neighborhood characteristics such as the majority race and gender of the neighborhood.
