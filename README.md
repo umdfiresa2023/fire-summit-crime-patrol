@@ -1,5 +1,6 @@
-# Team Name’s FIRE Summit Presentation
-Team Members
+# Team Crime Patrol FIRE Summit Presentation
+Esha Shah, Advik Sachdeva, Sreeja Yellapragada, Kush Vachher, Alan
+Zhang, Brian Mark Crimy
 
 ## Research Question
 
@@ -12,137 +13,30 @@ Baltimore City? 
 
 **Outcome variable**
 
-Our outcome variable are the crime rates in the specific counties.
+Our outcome variable is the crime rates in specific neighborhoods.
 
-This data was obtained from Baltimore City Crime Data at a neighborhood
-level.
+The data comes from the Baltimore Police Department as part of Open Data
+Baltimore.<https://data.baltimorecity.gov/datasets/part-1-crime-data/explore>
 
 We categorized each of the crime entries into property crimes and
 violent crimes, and then organized them by date, as shown in the code
 below.
 
-``` r
-install.packages("tidyverse")
-```
-
-    Installing package into '/cloud/lib/x86_64-pc-linux-gnu-library/4.3'
-    (as 'lib' is unspecified)
-
-``` r
-library("tidyverse")
-```
-
-    ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-    ✔ dplyr     1.1.3     ✔ readr     2.1.4
-    ✔ forcats   1.0.0     ✔ stringr   1.5.0
-    ✔ ggplot2   3.4.4     ✔ tibble    3.2.1
-    ✔ lubridate 1.9.3     ✔ tidyr     1.3.0
-    ✔ purrr     1.0.2     
-
-    ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-    ✖ dplyr::filter() masks stats::filter()
-    ✖ dplyr::lag()    masks stats::lag()
-    ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
-
-``` r
-#Read crime data
-crime <- read.csv("crime_14_22.csv")
-crime2<-crime %>%
-  
-  mutate(Violent= ifelse(Description== "HOMICIDE", 1, 0)) %>%
-  
-  mutate(Violent= ifelse(Description== "AGG. ASSAULT", 1, Violent)) %>%
-  
-  mutate(Violent= ifelse(Description== "COMMON ASSAULT", 1, Violent)) %>% 
-  
-  mutate(Violent= ifelse(Description== "RAPE", 1, Violent)) %>% 
-  
-  mutate(Violent= ifelse(Description== "SHOOTING", 1, Violent)) %>% 
-  
-  mutate(Property= ifelse(Description== "ROBBERY - CARJACKING", 1, 0)) %>%
-  
-  mutate(Violent= ifelse(Description== "ROBBERY - COMMERCIAL", 1, Violent)) %>%
-  
-  mutate(Violent= ifelse(Description== "ROBBERY - STREET", 1,Violent)) %>%
-  
-  mutate(Violent= ifelse(Description== "ROBBERY - RESIDENCE", 1, Violent)) %>%
-  
-  mutate(Property= ifelse(Description== "ARSON", 1, Property)) %>%
-  
-  mutate(Property= ifelse(Description== "AUTO THEFT", 1, Property)) %>%
-  
-  mutate(Property= ifelse(Description== "BURGLARY", 1, Property)) %>%
-  
-  mutate(Property= ifelse(Description== "LARCENY", 1, Property)) %>%
-  
-  mutate(Property= ifelse(Description== "LARCENY FROM AUTO", 1, Property)) %>%
-  
-  mutate(Race = ifelse(Race == "", "UNKNOWN", Race)) %>%
-  
-  mutate(Neighborhood = ifelse(Neighborhood == "", "UNKNOWN", Neighborhood))
-
-crime_by_date <- crime2 %>%
-  group_by(Neighborhood, date) %>%
-  summarize(total_violent_crime = sum(Violent), total_property_crime = sum(Property))
-```
-
-    `summarise()` has grouped output by 'Neighborhood'. You can override using the
-    `.groups` argument.
-
 Then we visualized the violent and property crimes by neighborhood shown
-on the graphs below.
-
-``` r
-#| warning: false
-library("terra")
-```
-
-    terra 1.7.55
-
-
-    Attaching package: 'terra'
-
-    The following object is masked from 'package:tidyr':
-
-        extract
-
-``` r
-library("tidyverse")
-
-n<-vect("Neighborhood/Neighborhood.shp")
-```
-
-    Warning: [vect] Z coordinates ignored
-
-``` r
-n_project<-project(n, "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ")
-n_project$Name <- toupper(n_project$Name)
-
-df_sum <- read.csv("finaldata.csv") %>%
-  filter(Name %in% n_project$Name) %>%
-  group_by(Name) %>%
-  summarise(all_violent = sum(total_violent_crime), 
-            all_property = sum(total_property_crime))
-n2<-merge(n_project, df_sum, by = "Name")
-
-plot(n2, "all_violent", plg = list(title = "Violent Crimes by Neighborhood"))
-```
+on the graphs below. The graphs represent the crime levels of the
+different types of crime, sorted by neighborhood.
 
 ![](README_files/figure-commonmark/unnamed-chunk-2-1.png)
-
-``` r
-plot(n2, "all_property", plg = list(title = "Property Crimes by Neighborhood"))
-```
 
 ![](README_files/figure-commonmark/unnamed-chunk-2-2.png)
 
 **Treatment variable**
 
 The treatment variable is an indicator of whether there is wind in each
-county. We distinguished this by separating each date with a 0 or 1. A 0
-meant there was no wind flowing in the direction of that county, ergo no
-pollution that day. Similarly, a 1 meant there was wind flowing in that
-direction, ergo pollution was present.
+county. We distinguished this by separating each date-neighborhood with
+a 0 or 1. A 0 meant there was no wind flowing in the direction of that
+county, ergo no pollution that day. Similarly, a 1 meant there was wind
+flowing in that direction, ergo pollution was present.
 
 This data was obtained by NASA MERRA Data.
 
@@ -201,5 +95,9 @@ crime_by_race_date_intersect <- full_join(race2, intersect3, by = "Neighborhood"
 
 ## Preliminary Results
 
-Display a figure showing how the treatment variable impacted the outcome
-variable.![](kush%20graph.png)
+This graph shows the average amount number of violent crimes per day for
+20 random counties in the dataset, on days where there was
+wind/pollution (blue) and days where there was no wind/no pollution
+(red).
+
+![](kush%20graph.png)
