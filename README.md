@@ -23,8 +23,9 @@ violent crimes, and then organized them by date, as shown in the code
 below.
 
 Then we visualized the violent and property crimes by neighborhood shown
-on the graphs below. The graphs represent the crime levels of the
-different types of crime, sorted by neighborhood.
+on the graphs below. The graphs represent the accumalated crime levels
+of the different types of crime, sorted by neighborhood. The data was
+collected over the span of 9 years, from 2014-2022.
 
 ![](README_files/figure-commonmark/unnamed-chunk-2-1.png)
 
@@ -101,3 +102,6 @@ wind/pollution (blue) and days where there was no wind/no pollution
 (red).
 
 ![](kush%20graph.png)
+
+Overall, the graphs show a correlation between wind/pollution and
+violent crime in Baltimore City based on our findings.

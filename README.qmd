@@ -147,4 +147,6 @@ crime_by_race_date_intersect <- full_join(race2, intersect3, by = "Neighborhood"
 
 ## Preliminary Results
 
-Display a figure showing how the treatment variable impacted the outcome variable.![](kush%20graph.png)
+This graph shows the average amount number of violent crimes per day for 20 random counties in the dataset, on days where there was wind/pollution (blue) and days where there was no wind/no pollution (red).
+
+![](kush%20graph.png)
