@@ -1,6 +1,6 @@
 ---
-title: "Team Name's FIRE Summit Presentation"
-author: "Team Members"
+title: "Team Crime Patrol FIRE Summit Presentation"
+author: "Esha Shah, Advik Sachdeva, Sreeja Yellapragada, Kush Vachher, Alan Zhang, Brian Mark Crimy"
 format: gfm
 editor: visual
 ---
@@ -15,13 +15,16 @@ How does the air pollution rate impact the violent crime rate in Baltimore City?
 
 **Outcome variable**
 
-Our outcome variable are the crime rates in the specific counties.
+Our outcome variable is the crime rates in specific neighborhoods.
 
-This data was obtained from Baltimore City Crime Data at a neighborhood level.
+The data comes from the Baltimore Police Department as part of Open Data Baltimore.<https://data.baltimorecity.gov/datasets/part-1-crime-data/explore>
 
 We categorized each of the crime entries into property crimes and violent crimes, and then organized them by date, as shown in the code below.
 
 ```{r}
+
+#| eval: false
+#| echo: false
 #install.packages("tidyverse")
 library("tidyverse")
 
@@ -66,10 +69,10 @@ crime_by_date <- crime2 %>%
   summarize(total_violent_crime = sum(Violent), total_property_crime = sum(Property))
 ```
 
-Then we visualized the violent and property crimes by neighborhood shown on the graphs below.
+Then we visualized the violent and property crimes by neighborhood shown on the graphs below. The graphs represent the crime levels of the different types of crime, sorted by neighborhood.
 
 ```{r}
-
+#| echo: false
 #| warning: false
 library("terra")
 #library("tidyverse")
@@ -91,15 +94,13 @@ plot(n2, "all_property", plg = list(title = "Property Crimes by Neighborhood"))
 
 **Treatment variable**
 
-The treatment variable is an indicator of whether there is wind in each county. We distinguished this by separating each date with a 0 or 1. A 0 meant there was no wind flowing in the direction of that county, ergo no pollution that day. Similarly, a 1 meant there was wind flowing in that direction, ergo pollution was present.
+The treatment variable is an indicator of whether there is wind in each county. We distinguished this by separating each date-neighborhood with a 0 or 1. A 0 meant there was no wind flowing in the direction of that county, ergo no pollution that day. Similarly, a 1 meant there was wind flowing in that direction, ergo pollution was present.
 
 This data was obtained by NASA MERRA Data.
 
 In this code, we first found the angle of each county using the coordinate points from our data. Then, we converted the angles to degrees. Finally, we categorized whether or not the county had wind flowing in its direction with a zero or one using a if else statement.
 
-``` r
-{r}
-
+```{r}
 #| eval: false
 #| echo: false
 
@@ -145,7 +146,7 @@ crime_by_race_date_intersect <- full_join(race2, intersect3, by = "Neighborhood"
 
 ## Preliminary Results
 
-Display a figure showing how the treatment variable impacted the outcome variable
+This graph shows the average amount number of violent crimes per day for 20 random counties in the dataset, on days where there was wind/pollution (blue) and days where there was no wind/no pollution (red).
 
 ![](kush%20graph.png)
 

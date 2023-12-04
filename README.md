@@ -1,5 +1,6 @@
-# Team Name’s FIRE Summit Presentation
-Team Members
+# Team Crime Patrol FIRE Summit Presentation
+Esha Shah, Advik Sachdeva, Sreeja Yellapragada, Kush Vachher, Alan
+Zhang, Brian Mark Crimy
 
 ## Research Question
 
@@ -12,16 +13,18 @@ Baltimore City? 
 
 **Outcome variable**
 
-Our outcome variable are the crime rates in the specific counties.
+Our outcome variable is the crime rates in specific neighborhoods.
 
-This data was obtained from Baltimore City Crime Data at a neighborhood
-level.
+The data comes from the Baltimore Police Department as part of Open Data
+Baltimore.<https://data.baltimorecity.gov/datasets/part-1-crime-data/explore>
 
 We categorized each of the crime entries into property crimes and
 violent crimes, and then organized them by date, as shown in the code
 below.
 
 ``` r
+#| eval: false
+#| echo: false
 #install.packages("tidyverse")
 library("tidyverse")
 ```
@@ -83,59 +86,20 @@ crime_by_date <- crime2 %>%
     `.groups` argument.
 
 Then we visualized the violent and property crimes by neighborhood shown
-on the graphs below.
-
-``` r
-#| warning: false
-library("terra")
-```
-
-    terra 1.7.55
-
-
-    Attaching package: 'terra'
-
-    The following object is masked from 'package:tidyr':
-
-        extract
-
-``` r
-#library("tidyverse")
-
-n<-vect("Neighborhood/Neighborhood.shp")
-```
-
-    Warning: [vect] Z coordinates ignored
-
-``` r
-n_project<-project(n, "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ")
-n_project$Name <- toupper(n_project$Name)
-
-df_sum <- read.csv("finaldata.csv") %>%
-  filter(Name %in% n_project$Name) %>%
-  group_by(Name) %>%
-  summarise(all_violent = sum(total_violent_crime), 
-            all_property = sum(total_property_crime))
-n2<-merge(n_project, df_sum, by = "Name")
-
-plot(n2, "all_violent", plg = list(title = "Violent Crimes by Neighborhood"))
-```
+on the graphs below. The graphs represent the crime levels of the
+different types of crime, sorted by neighborhood.
 
 ![](README_files/figure-commonmark/unnamed-chunk-2-1.png)
-
-``` r
-plot(n2, "all_property", plg = list(title = "Property Crimes by Neighborhood"))
-```
 
 ![](README_files/figure-commonmark/unnamed-chunk-2-2.png)
 
 **Treatment variable**
 
 The treatment variable is an indicator of whether there is wind in each
-county. We distinguished this by separating each date with a 0 or 1. A 0
-meant there was no wind flowing in the direction of that county, ergo no
-pollution that day. Similarly, a 1 meant there was wind flowing in that
-direction, ergo pollution was present.
+county. We distinguished this by separating each date-neighborhood with
+a 0 or 1. A 0 meant there was no wind flowing in the direction of that
+county, ergo no pollution that day. Similarly, a 1 meant there was wind
+flowing in that direction, ergo pollution was present.
 
 This data was obtained by NASA MERRA Data.
 
@@ -143,31 +107,6 @@ In this code, we first found the angle of each county using the
 coordinate points from our data. Then, we converted the angles to
 degrees. Finally, we categorized whether or not the county had wind
 flowing in its direction with a zero or one using a if else statement.
-
-``` r
-{r}
-
-#| eval: false
-#| echo: false
-
-library("terra")
-library("tidyterra")
-
-all<-read.csv("full_merge.csv") %>%
-  rename(Name=Neighborhood) %>%
-  mutate(wind_dir=atan2(ULML, VLML)*(180/pi))
-
-all2<-merge(df2, all, by="Name")%>%
-  mutate(treatment = ifelse(wind_dir > min_ang & wind_dir< max_ang, 1, 0)) %>%
-  filter(!is.na(treatment)) %>%
-  select(-X.x, -X.y, -ang1, -ang2, -n1x, -n2x, -n1y, -n2y, -ULML, -VLML)
-
-write.csv(all2, "finaldata.csv", row.names = F)
-
-test<-all2 %>%
-  select(min_ang, max_ang, wind_dir) %>%
-  mutate(in_dir = ifelse(wind_dir > min_ang & wind_dir< max_ang, 1, 0))
-```
 
 **Control variables**
 
@@ -194,8 +133,10 @@ crime_by_race_date_intersect <- full_join(race2, intersect3, by = "Neighborhood"
 
 ## Preliminary Results
 
-Display a figure showing how the treatment variable impacted the outcome
-variable
+This graph shows the average amount number of violent crimes per day for
+20 random counties in the dataset, on days where there was
+wind/pollution (blue) and days where there was no wind/no pollution
+(red).
 
 ![](kush%20graph.png)
 
@@ -274,5 +215,7 @@ summary(Model4)
     F-statistic(proj model): 12.72 on 4 and 125217 DF, p-value: 2.383e-10 
     *** Standard errors may be too high due to more than 2 groups and exactDOF=FALSE
 
-Both regressions in each model were statistically significant, but the
-second model is more accurate as takes more variables into account.
+The first regression was statistically significant because the treatment
+variable had three stars. However, our second regression was
+statistically insignificant when we added more variables to our model,
+making it inconclusive.
