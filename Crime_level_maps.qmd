@@ -1,0 +1,28 @@
+---
+title: "Interstate and Neighborhood Code"
+format: html
+editor: visual
+---
+
+```{r}
+#install.packages("terra")
+library("terra")
+library("tidyverse")
+```
+
+```{r}
+n<-vect("Neighborhood/Neighborhood.shp")
+n_project<-project(n, "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ")
+n_project$Name <- toupper(n_project$Name)
+plot(n_project)
+
+df_sum <- read.csv("finaldata.csv") %>%
+  filter(Name %in% n_project$Name) %>%
+  group_by(Name) %>%
+  summarise(all_violent = sum(total_violent_crime), 
+            all_property = sum(total_property_crime))
+n2<-merge(n_project, df_sum, by = "Name")
+
+plot(n2, "all_violent")
+plot(n2, "all_property")
+```

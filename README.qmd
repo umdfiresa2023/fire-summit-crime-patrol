@@ -22,7 +22,7 @@ This data was obtained from Baltimore City Crime Data at a neighborhood level.
 We categorized each of the crime entries into property crimes and violent crimes, and then organized them by date, as shown in the code below.
 
 ```{r}
-install.packages("tidyverse")
+#install.packages("tidyverse")
 library("tidyverse")
 
 #Read crime data
@@ -72,7 +72,7 @@ Then we visualized the violent and property crimes by neighborhood shown on the 
 
 #| warning: false
 library("terra")
-library("tidyverse")
+#library("tidyverse")
 
 n<-vect("Neighborhood/Neighborhood.shp")
 n_project<-project(n, "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs ")
@@ -145,4 +145,26 @@ crime_by_race_date_intersect <- full_join(race2, intersect3, by = "Neighborhood"
 
 ## Preliminary Results
 
-Display a figure showing how the treatment variable impacted the outcome variable.![](kush graph.png)
+Display a figure showing how the treatment variable impacted the outcome variable
+
+![](kush%20graph.png)
+
+## Did Regression Models
+
+This is a Did regression model with our treatment group, treatment period, and there interaction.
+
+```{r}
+library("lfe")
+
+panel <- read.csv("paneldata(1).csv")
+summary(mode <- lm(total_violent_crime~treatment, data = panel))
+```
+
+This is a Did regression model that includes everything from the previous model, plus all of out other numerical, binary, and categorical variables.
+
+```{r}
+Model4<- felm(total_violent_crime~treatment + TLML + PRECTOT + SPEED| Name + month + dayofweek + year, data = panel)
+summary(Model4)
+```
+
+The first regression was statistically significant because the treatment variable had three stars. However, our second regression was statistically insignificant when we added more variables to our model, making it inconclusive.

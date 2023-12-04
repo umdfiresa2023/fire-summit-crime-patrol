@@ -22,13 +22,7 @@ violent crimes, and then organized them by date, as shown in the code
 below.
 
 ``` r
-install.packages("tidyverse")
-```
-
-    Installing package into '/cloud/lib/x86_64-pc-linux-gnu-library/4.3'
-    (as 'lib' is unspecified)
-
-``` r
+#install.packages("tidyverse")
 library("tidyverse")
 ```
 
@@ -38,7 +32,6 @@ library("tidyverse")
     ✔ ggplot2   3.4.4     ✔ tibble    3.2.1
     ✔ lubridate 1.9.3     ✔ tidyr     1.3.0
     ✔ purrr     1.0.2     
-
     ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
     ✖ dplyr::filter() masks stats::filter()
     ✖ dplyr::lag()    masks stats::lag()
@@ -107,7 +100,7 @@ library("terra")
         extract
 
 ``` r
-library("tidyverse")
+#library("tidyverse")
 
 n<-vect("Neighborhood/Neighborhood.shp")
 ```
@@ -202,4 +195,84 @@ crime_by_race_date_intersect <- full_join(race2, intersect3, by = "Neighborhood"
 ## Preliminary Results
 
 Display a figure showing how the treatment variable impacted the outcome
-variable.![](kush%20graph.png)
+variable
+
+![](kush%20graph.png)
+
+## Did Regression Models
+
+This is a Did regression model with our treatment group, treatment
+period, and there interaction.
+
+``` r
+library("lfe")
+```
+
+    Loading required package: Matrix
+
+
+    Attaching package: 'Matrix'
+
+    The following objects are masked from 'package:tidyr':
+
+        expand, pack, unpack
+
+``` r
+panel <- read.csv("paneldata(1).csv")
+summary(mode <- lm(total_violent_crime~treatment, data = panel))
+```
+
+
+    Call:
+    lm(formula = total_violent_crime ~ treatment, data = panel)
+
+    Residuals:
+        Min      1Q  Median      3Q     Max 
+    -0.2891 -0.2093 -0.2093 -0.2093 11.7907 
+
+    Coefficients:
+                Estimate Std. Error t value Pr(>|t|)    
+    (Intercept) 0.209295   0.001747  119.83   <2e-16 ***
+    treatment   0.079850   0.005636   14.17   <2e-16 ***
+    ---
+    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+    Residual standard error: 0.5878 on 125291 degrees of freedom
+    Multiple R-squared:  0.001599,  Adjusted R-squared:  0.001591 
+    F-statistic: 200.7 on 1 and 125291 DF,  p-value: < 2.2e-16
+
+This is a Did regression model that includes everything from the
+previous model, plus all of out other numerical, binary, and categorical
+variables.
+
+``` r
+Model4<- felm(total_violent_crime~treatment + TLML + PRECTOT + SPEED| Name + month + dayofweek + year, data = panel)
+summary(Model4)
+```
+
+
+    Call:
+       felm(formula = total_violent_crime ~ treatment + TLML + PRECTOT +      SPEED | Name + month + dayofweek + year, data = panel) 
+
+    Residuals:
+        Min      1Q  Median      3Q     Max 
+    -0.9973 -0.2255 -0.1087 -0.0088 11.8029 
+
+    Coefficients:
+                Estimate Std. Error t value Pr(>|t|)    
+    treatment  2.778e-03  6.332e-03   0.439 0.660826    
+    TLML       1.799e-03  3.599e-04   4.998  5.8e-07 ***
+    PRECTOT   -5.516e+01  1.432e+01  -3.850 0.000118 ***
+    SPEED     -1.778e-03  7.786e-04  -2.284 0.022401 *  
+    ---
+    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+    Residual standard error: 0.551 on 125217 degrees of freedom
+    Multiple R-squared(full model): 0.1231   Adjusted R-squared: 0.1226 
+    Multiple R-squared(proj model): 0.0004061   Adjusted R-squared: -0.0001926 
+    F-statistic(full model):234.5 on 75 and 125217 DF, p-value: < 2.2e-16 
+    F-statistic(proj model): 12.72 on 4 and 125217 DF, p-value: 2.383e-10 
+    *** Standard errors may be too high due to more than 2 groups and exactDOF=FALSE
+
+Both regressions in each model were statistically significant, but the
+second model is more accurate as takes more variables into account.
